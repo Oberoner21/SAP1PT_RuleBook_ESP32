@@ -29,31 +29,30 @@ void GenerateRuleJMP(uint16_t rule) {
     SetRule(rule, '1', '1', RIGHT, rule+1);
     SetRule(rule, '$', '$', RIGHT, rule+1);
     rule++;
-    
+
+    // Seek left to IR and remark it
+    rule = next_LEFT(rule);
+    SetRule(rule-1, '_', '$', LEFT, rule);
+
     // Seek to PC and mark it
-    rule = next$RIGHT(rule);
+    rule = next$LEFT(rule);
     SetRule(rule-1, '$', '_', RIGHT, rule);
+
     // Seek to bit7 of MMB
     rule = next_RIGHT(rule);
 
     // Copy low nibbel of MMB into interleaved PC
     rule = CopyMMBArgToPC(rule);
-
-    // Remark PC
-    rule = next_LEFT(rule);
-    SetRule(rule-1, '_', '$', RIGHT, rule);
-    
-    // ++++++++++++ END ++++++++++++++++++
-
+   
     // Seek back to MMB an remark it
     rule = next_RIGHT(rule); 
     SetRule(rule-1, '_', '$', LEFT, rule);
-    // Seek to marked register IR and remark it
+    // Remark PC
     rule = next_LEFT(rule);
     SetRule(rule-1, '_', '$', RIGHT, rule);
-    // Skip right Instruction Register IR
+    // Skip right PC
     rule = next$RIGHT(rule);     
-    // Skip right Program counter PC
+    // Skip right IR
     rule = next$RIGHT(rule); 
     // Skip right Memory Address Register MAR and go to RULE_FETCH
     rule = next$RIGHT(rule);

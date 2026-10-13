@@ -22,7 +22,7 @@ void GenerateRuleLDA(uint16_t rule) {
     SetRule(rule, '$', '$', LEFT, rule+1);
     rule++;
 
-    // Skip left IR (is yet market) and output register
+    // Skip left IR (is yet market) and PC
     rule = next$LEFT(rule);
 
     // Skip left A/B register and mark it
@@ -34,7 +34,7 @@ void GenerateRuleLDA(uint16_t rule) {
     SetRule(rule-1, '_', '$', RIGHT, rule);
 
     // Skip IR
-    rule = next$RIGHT(rule);
+    //rule = next$RIGHT(rule);
 
     // Seek right to register MAR and mark it
     rule = next$RIGHT(rule);
@@ -55,17 +55,15 @@ void GenerateRuleLDA(uint16_t rule) {
     // Change the direction of last rule to RIGHT
     SetRule(rule-1, '_', '_', RIGHT, rule);
 
-    // copy MMR to register B
+    // copy MMR to register A
     rule = CopyMMBToAB(rule);
 
     // Skip right A/B register
     rule = next$RIGHT(rule); 
-    // Skip right Output register
+    // Skip right PC
     rule = next$RIGHT(rule); 
     // Skip right Instruction Register IR
     rule = next$RIGHT(rule);     
-    // Skip right Program counter PC
-    rule = next$RIGHT(rule); 
     // Skip right Memory Address Register MAR and go to RULE_FETCH
     rule = next$RIGHT(rule);
     SetRule(rule-1, '$', '$', LEFT, RULE_FETCH);  

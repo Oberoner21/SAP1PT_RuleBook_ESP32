@@ -7,119 +7,56 @@
 
 #define     NOTEPADSIZE     0x100       // SAP1PT Notepad size 
 #define     REG_A_START     5           // Notepad start position of register A/B
-#define     MEMSTART        49          // Notepad start position of 16 byte SAP1 Memory
-#define     EPROMSIZE       0x8000
+#define     MEMSTART        40          // Notepad start position of 16 byte SAP1 Memory
 
 // Fibonacci 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233
 //           0x01, 0x02, 0x03, 0x05, 0x08, 0x0D, 0x15, 0x22, 0x37, 0x59, 0x90, 0xE9
 unsigned char Program[16] = {
-                    // Fibonacci
-	0x51,			//	LDI 0x1
-	0x4E,			//	STA [0xE]
-	0x50,			//	LDI 0x0
-	0x2E,			//	ADD [0xE]
-	0x70,			//	JC 0x0
-	0xE0,			//	OUT
-	0x4F,			//	STA [0xF]
-	0x1E,			//	LDA [0xE]
-	0x4D,			//	STA [0xD]
-	0x1F,			//	LDA [0xF]
-	0x4E,			//	STA [0xE]
-	0x1D,			//	LDA [0xD]
-	0x63,			//	JMP 0x3
-	0x00,
-	0x00,
-	0x00
+            // Fibonacci
+	0x00,   // 0x0  Data0
+	0x00,   // 0x1  Data1
+	0x00,   // 0x2  Data2
+	0x51,	// 0x3  LDI 0x1
+	0x41,   // 0x4  STA [0x1]
+	0x50,	// 0x5  LDI 0x0
+	0x21,	// 0x6  ADD [0x1]
+	0x73,	// 0x7  JC 0x3
+	0xE0,	// 0x8  OUT
+	0x42,	// 0x9  STA [0x2]
+	0x11,	// 0xA  LDA [0x1]
+	0x40,	// 0xB	STA [0x0]
+	0x12,	// 0xC	LDA [0x2]
+	0x41,	// 0xD  STA [0x1]
+	0x10,	// 0xE	LDA [0x0]
+	0x66 	// 0xF  JMP 0x6
 };
 
 // unsigned char Program[16] = {
-//     // Sub [0xE] - [0xF]
-// 	0x1E,			//	LDA [0xE]
-// 	0x3F,			//	SUB [0xF]
+//                     // Fibonacci
+// 	0x51,			//	LDI 0x1
+// 	0x4E,			//	STA [0xE]
+// 	0x50,			//	LDI 0x0
+// 	0x2E,			//	ADD [0xE]
+// 	0x70,			//	JC 0x0
 // 	0xE0,			//	OUT
-// 	0xF0,			//	HLT
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x28,
-// 	0x14
-// };
-
-// unsigned char Program[16] = {
-//     // UP/Down counter
+// 	0x4F,			//	STA [0xF]
 // 	0x1E,			//	LDA [0xE]
-// 	0x3F,			//	SUB [0xF]
-// 	0xE0,			//	OUT
-//     0x85,           //  JZ 0x5
-//     0x61,           //  JMP 0x1
-// 	0x2F,           //  ADD [0xF]
-// 	0x71,           //  JC 0x1
-// 	0xE0,           //  OUT
-// 	0x65,           //  JMP 5
+// 	0x4D,			//	STA [0xD]
+// 	0x1F,			//	LDA [0xF]
+// 	0x4E,			//	STA [0xE]
+// 	0x1D,			//	LDA [0xD]
+// 	0x63,			//	JMP 0x3
 // 	0x00,
 // 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0x00,
-// 	0xFF,
-// 	0x01
+// 	0x00
 // };
-
 
 const char SAP1_REGISTERS[] = (
-    // ZC A/B              Output   IR   PC       MAR
-    "$$10$0000000000000000$00000000$0000$00000001$0000"
+    // ZC A/B              PC       IR   MAR
+    "$$10$0000000000000000$00001011$0000$0000"
 );
 
-uint8_t SAP1PTTape[EPROMSIZE];
 uint16_t notePad[NOTEPADSIZE];
-char outBuffer[10];
-
-
-void makeOutStr() {
-
-    // Erstellt aus dem Wert des Registers A einen Ausgabestring in outBuffer
-
-    uint8_t outValue = 0;
-
-    for(uint8_t i=REG_A_START; i<REG_A_START+16; i+=2) {
-
-        uint8_t bit = notePad[i];
-        outValue = (outValue << 1) + bit;
-    }
-
-    sprintf(outBuffer, "%d", outValue);
-}
-
-void GenerateSAP1PTTape(){
-
-    uint16_t i;
-
-    for(i=0; i<EPROMSIZE; i++) {
-
-        // Inizialize EPROM with 0
-        SAP1PTTape[i] = 0;
-    }
-
-    for(i=0; i<NOTEPADSIZE; i++) {
-
-        // Copy Notepad to EPRom tape
-        SAP1PTTape[i] = notePad[i];
-    }
-
-    // Generate the EPROM-BIN-File for the SAP1PT Tape
-    FILE* file = fopen( "../../EPROM/SAP1PTTape.bin", "wb" );
-    fwrite( SAP1PTTape, 1, EPROMSIZE, file );
-    fclose(file);    
-}
-
 
 void CopyProgram(){
 
@@ -163,5 +100,4 @@ void BuildNotepad()
     }
 
     CopyProgram();
-    //GenerateSAP1PTTape();
 }

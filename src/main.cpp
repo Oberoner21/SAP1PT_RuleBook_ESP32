@@ -14,7 +14,7 @@
 #include "notepad.h"
 #include "rulebook.h"
 
-#define USE_FSM     1   // 1 = Use external hardware notepad, 0 = Emulate the notepad
+#define USE_FSM     0   // 1 = Use external hardware notepad, 0 = Emulate the notepad
 
 // ESP32 pin definition
 const uint8_t OUTCLK_PIN        = 32;       // D32
@@ -37,6 +37,7 @@ uint8_t lastRule;
 int8_t direction;
 uint16_t lastNotePadPointer;
 long cykles = 0;
+long cyklesBefore = 0;
 
 void setup() {
     Serial.begin(115200);
@@ -66,7 +67,7 @@ void setup() {
 
 void loop() {
 
-    delayMicroseconds(10);  // 10uS = 100kHz
+    delayMicroseconds(100);  // 10uS = 100kHz, 100uS = 10kHz, 1000uS = 1kHz
 
     if(!halt) {
 
@@ -149,29 +150,39 @@ void loop() {
 
             }
 
+            if(rule == RULE_OUT) {
+
+                Serial.println(cykles - cyklesBefore);
+                cyklesBefore = cykles;
+            }
+
         } else {
+
+            cykles++;
 
             // Use internal Notepad
             uint8_t symbol = notePad[notePadPointer];
             uint16_t nextRule = ruleBook[rule][symbol].next;
-            notePad[notePadPointer] = ruleBook[rule][symbol].writeSymbol;
+            uint8_t wSymbol = ruleBook[rule][symbol].writeSymbol;
+            notePad[notePadPointer] = wSymbol;
 
             // Send out the Writesymbol
             digitalWrite(DATA0_OUT_PIN, ruleBook[rule][symbol].writeSymbol & 0x01 ? HIGH : LOW);
             digitalWrite(DATA1_OUT_PIN, ruleBook[rule][symbol].writeSymbol & 0x02 ? HIGH : LOW);
             digitalWrite(OUTCLK_PIN, ruleBook[rule][symbol].clkOut);
 
-            notePadPointer += ruleBook[rule][symbol].direction;
+            direction = ruleBook[rule][symbol].direction;
+            notePadPointer += direction;
             rule = nextRule;
 
             if(rule == RULE_ERROR) {
 
                 Serial.println();
                 Serial.println("ERROR state");
-                Serial.print("NPP: 0x");
-                Serial.print(notePadPointer);
+                Serial.print("NPP: ");
+                Serial.print(notePadPointer -1);
                 Serial.print("  RSymbol: ");
-                Serial.print(cSymbols[symbol]);
+                Serial.print(cSymbols[notePad[notePadPointer -1]]);
                 Serial.print("  LastRule: ");
                 Serial.println(rule);
 
@@ -182,14 +193,20 @@ void loop() {
 
                 Serial.println();
                 Serial.println("END state");
-                Serial.print("NPP: 0x");
-                Serial.print(notePadPointer);
+                Serial.print("NPP: ");
+                Serial.print(notePadPointer -1);
                 Serial.print("  RSymbol: ");
-                Serial.print(cSymbols[symbol]);
+                Serial.print(cSymbols[notePad[notePadPointer -1]]);
                 Serial.print("  LastRule: ");
                 Serial.println(rule);
 
                 halt = true;
+            }
+
+            if(rule == RULE_OUT) {
+
+                Serial.println(cykles - cyklesBefore);
+                cyklesBefore = cykles;
             }
 
         }

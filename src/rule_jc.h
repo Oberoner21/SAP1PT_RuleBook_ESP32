@@ -3,9 +3,7 @@
     Modul:  rule_jc.h
 
     Copyright(C) 2026 by Oberoner
-*/
 
-/*
     Instruction rule for JC
     Entry conditions: IR and current MMB is marked
     Entry point     : NP pointer position I0 of Instruction Register IR
@@ -47,15 +45,19 @@ void GenerateRuleJC(uint16_t rule) {
 
     // Skip marked IR
     rule = next_RIGHT(rule);
-    SetRule(rule-1, '_', '_', RIGHT, rule+82);     // <-- Jump to END !!!!
+    SetRule(rule-1, '_', '_', RIGHT, rule+84);     // <-- Jump to END !!!!
 
     // ++++++++ Carry is set +++++++++++++
 
-    // Seek to IR (the Marker is yet set)
-    rule = next_RIGHT(rule);
     // Seek to PC and mark it
     rule = next$RIGHT(rule);
+    rule = next$RIGHT(rule);
     SetRule(rule-1, '$', '_', RIGHT, rule);
+
+    // Seek to IR and remark it
+    rule = next_RIGHT(rule);
+    SetRule(rule-1, '_', '$', RIGHT, rule);
+
     // Seek to bit7 of MMB
     rule = next_RIGHT(rule);
 
@@ -65,7 +67,11 @@ void GenerateRuleJC(uint16_t rule) {
     // Remark PC
     rule = next_LEFT(rule);
     SetRule(rule-1, '_', '$', RIGHT, rule);
-    
+
+    // Seek to IR and mark it
+    rule = next$RIGHT(rule);
+    SetRule(rule-1, '$', '_', RIGHT, rule);
+
     // ++++++++++++ END ++++++++++++++++++
 
     // Seek back to MMB and remark it
@@ -76,8 +82,6 @@ void GenerateRuleJC(uint16_t rule) {
     SetRule(rule-1, '_', '$', RIGHT, rule);
     // Skip right Instruction Register IR
     rule = next$RIGHT(rule);     
-    // Skip right Program counter PC
-    rule = next$RIGHT(rule); 
     // Skip right Memory Address Register MAR and go to RULE_FETCH
     rule = next$RIGHT(rule);
     SetRule(rule-1, '$', '$', LEFT, RULE_FETCH);  

@@ -34,7 +34,7 @@ void GenerateRuleADD(uint16_t rule) {
     SetRule(rule, '$', '$', LEFT, rule+1);
     rule++;
 
-    // Skip left IR (is yet market) and output register
+    // Skip left IR (is yet market) and PC
     rule = next$LEFT(rule);
 
     // Skip left A/B register and mark it
@@ -46,7 +46,7 @@ void GenerateRuleADD(uint16_t rule) {
     SetRule(rule-1, '_', '$', RIGHT, rule);
 
     // Skip Program counter PC
-    rule = next$RIGHT(rule);
+    //rule = next$RIGHT(rule);
 
     // Seek to MAR and mark it
     rule = next$RIGHT(rule);
@@ -141,7 +141,7 @@ void GenerateRuleADD(uint16_t rule) {
     SetRule(rule, '0', '1', RIGHT, rule+1); // ++++++ Rule 1158
     SetRule(rule, '1', '1', RIGHT, rule+1);
     rule++; 
-    
+ 
     // Fill register B with 0
     // 15 - Skip to right over carry
     rule = nextRIGHT(rule);
@@ -155,12 +155,11 @@ void GenerateRuleADD(uint16_t rule) {
     SetRule(rule, '$', '$', RIGHT, rule+1);   
     rule++;
 
-    // Skip right Output register
+    // Skip right PC
     rule = next$RIGHT(rule); 
     // Skip right Instruction Register IR
     rule = next$RIGHT(rule);     
-    // Skip right Program counter PC
-    rule = next$RIGHT(rule); 
+
     // Skip right Memory Address Register MAR and go to RULE_FETCH
     rule = next$RIGHT(rule);
     SetRule(rule-1, '$', '$', LEFT, RULE_FETCH);  

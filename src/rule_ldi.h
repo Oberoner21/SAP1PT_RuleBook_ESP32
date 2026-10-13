@@ -32,7 +32,7 @@ void GenerateRuleLDI(uint16_t rule) {
     SetRule(rule, '$', '$', LEFT, rule+1);
     rule++;
 
-    // Skip left IR (is yet market) and output register
+    // Skip left IR (is yet market) and PC
     rule = next$LEFT(rule);
 
     // Skip left A/B register and mark it
@@ -120,12 +120,10 @@ void GenerateRuleLDI(uint16_t rule) {
 
     // Skip right register A/B
     rule = next$RIGHT(rule);
-    // Skip right Output register
+    // Skip right PC
     rule = next$RIGHT(rule); 
     // Skip right Instruction Register IR
-    rule = next$RIGHT(rule);     
-    // Skip right Program counter PC
-    rule = next$RIGHT(rule); 
+    rule = next$RIGHT(rule);    
     // Skip right Memory Address Register MAR and go to RULE_FETCH
     rule = next$RIGHT(rule);
     SetRule(rule-1, '$', '$', LEFT, RULE_FETCH);  
