@@ -13,6 +13,7 @@
 //           0x01, 0x02, 0x03, 0x05, 0x08, 0x0D, 0x15, 0x22, 0x37, 0x59, 0x90, 0xE9
 unsigned char Program[16] = {
             // Fibonacci
+            // .org 0x3     // Program starts on address 0x3 (PC is preloded to 3)
 	0x00,   // 0x0  Data0
 	0x00,   // 0x1  Data1
 	0x00,   // 0x2  Data2
@@ -76,11 +77,6 @@ void CopyProgram(){
 
         npPointer = npPointer + 9;
     }
-
-    // Mark the end of Notepad
-    notePad[NOTEPADSIZE-1] = symbol2num('$');
-    notePad[NOTEPADSIZE-2] = symbol2num('$');
-    notePad[NOTEPADSIZE-3] = symbol2num('$');
 }
 
 
@@ -99,5 +95,11 @@ void BuildNotepad()
         notePad[i] = symbol2num(SAP1_REGISTERS[i]);
     }
 
+    // Mark the end of Notepad
+    notePad[NOTEPADSIZE-1] = symbol2num('$');
+    notePad[NOTEPADSIZE-2] = symbol2num('$');
+    notePad[NOTEPADSIZE-3] = symbol2num('$');
+
+    // Copy the program into the Notepad
     CopyProgram();
 }

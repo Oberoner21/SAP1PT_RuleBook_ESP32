@@ -14,7 +14,7 @@
 #include "notepad.h"
 #include "rulebook.h"
 
-#define USE_FSM     0   // 1 = Use external hardware notepad, 0 = Emulate the notepad
+#define USE_FSM     1   // 1 = Use external hardware notepad, 0 = Emulate the notepad
 
 // ESP32 pin definition
 const uint8_t OUTCLK_PIN        = 32;       // D32
