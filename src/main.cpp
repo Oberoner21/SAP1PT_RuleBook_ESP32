@@ -97,6 +97,7 @@ void loop() {
                         lastNotePadPointer = notePadPointer;
             //Serial.print(cSymbols[ruleBook[rule][symbol].writeSymbol]);
             if(cykles < 256) Serial.print(cSymbols[symbol]);
+            if(cykles == 256) Serial.println();
 
             lastRule = rule;
             // Make nextRule to the current rule in next cykle
@@ -180,10 +181,10 @@ void loop() {
                 Serial.println();
                 Serial.println("ERROR state");
                 Serial.print("NPP: ");
-                Serial.print(notePadPointer -1);
+                Serial.print(notePadPointer);
                 Serial.print("  RSymbol: ");
-                Serial.print(cSymbols[notePad[notePadPointer -1]]);
-                Serial.print("  LastRule: ");
+                Serial.print(cSymbols[notePad[notePadPointer]]);
+                Serial.print("  Rule: ");
                 Serial.println(rule);
 
                 halt = true;
@@ -194,10 +195,10 @@ void loop() {
                 Serial.println();
                 Serial.println("END state");
                 Serial.print("NPP: ");
-                Serial.print(notePadPointer -1);
+                Serial.print(notePadPointer);
                 Serial.print("  RSymbol: ");
-                Serial.print(cSymbols[notePad[notePadPointer -1]]);
-                Serial.print("  LastRule: ");
+                Serial.print(cSymbols[notePad[notePadPointer]]);
+                Serial.print("  Rule: ");
                 Serial.println(rule);
 
                 halt = true;

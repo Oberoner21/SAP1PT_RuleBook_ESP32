@@ -3,14 +3,19 @@
     Modul:  rule_markMemByte.h
 
     Copyright(C) 2026 by Oberoner
+
+    Marks the byte in the SAP1PT memory that is addressed by 
+    the value in the Memory Address Register (MAR).
+    Entry conditions: MAR is marked
+    Entry point     : NP pointer position M3 of register MAR
+    Exit conditions : MMB is marked
+    Exit point      : NP pointer position bit7 of MMB
+    Rules           : 6 
 */
 
 uint16_t MarkMemoryByte(uint16_t rule){
 
-    // Comment numbers are rule numbers from rule diagramm
-
-    // Entrypoint: NP pointer position: Bit M3 of register MAR
-    // Exitpoint : NP pointer position: Bit7 of the marked memory byte
+    // Comment numbers are the rule numbers of the rule diagramm
 
     uint8_t i;
 

@@ -3,15 +3,20 @@
     Modul:  rule_decode.h
 
     Copyright(C) 2026 by Oberoner
+
+    Decodes the instruction and executes it
+    Entry conditions: IR and current MMB is marked
+    Entry point     : NP pointer position I3 of Instruction Register IR
+    Exit conditions : IR and current MMB is marked
+    Exit point      : NP pointer position I0 of Instruction Register IR
+    Rules           : 31 
 */
 
-uint16_t GenerateRuleDECODE(uint16_t rule){
+void GenerateRuleDECODE(uint16_t rule){
 
     // Entrypoint:  NP pointer position: I3 of Instruction Registers IR
     // Exitpoint :  On exit to every instruction 
     //              NP pointer position: I0 of Instruction Register IR
-
-    uint8_t i;
 
     // ----- IR instruction demuxer 4 to 16 --------
 
@@ -126,5 +131,4 @@ uint16_t GenerateRuleDECODE(uint16_t rule){
     SetRule(rule, '$', '$', LEFT, RULE_HLT); // 0xF HLT
     rule++;
 
-    return rule;
 }

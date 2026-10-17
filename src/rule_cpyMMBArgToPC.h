@@ -3,80 +3,79 @@
     Modul:  cpyMMBArgToPC.h
 
     Copyright(C) 2026 by Oberoner
-*/
 
-/*
     Copies the argument (low nibble) from a marked memory byte (MMB) into 
     the interleaved program counter.
     Entry conditions: PC and MMB is marked
     Entry point     : NP pointer position bit7 of the MMB
-    Exit point      : NP pointer position one position left from marker of the MMB 
-    Rules           : 78
+    Exit conditions : Nothing is marked
+    Exit point      : NP pointer position M3
+    Rules           : 17
 */
 uint16_t CopyMMBArgToPC(uint16_t rule) {
 
-    uint8_t i, j;
+    // 0 Skip left to the MMB marker
+    rule = nextLEFT(rule);
+    // 1 Remark the MMB
+    SetRule(rule, '_', '$', RIGHT, rule+1);
+    rule++;
+    // 2 Skip right to bit6 of MMB
+    rule = nextRIGHT(rule);
+    // 3 Skip right to bit5 of MMB
+    rule = nextRIGHT(rule);
+    // 4 Skip right to bit4 of MMB
+    rule = nextRIGHT(rule);
+    // 5 Skip right to bit3 of MMB
+    rule = nextRIGHT(rule);
 
-    // Copy low nibbel of MMB into the interleaved PC
-    for(i=0; i<4; i++){
+    // 6 Read current bit of MMB mark it and branch
+    SetRule(rule, '0', '_', LEFT, rule+5);
+    SetRule(rule, '1', '_', LEFT, rule+1);
+    SetRule(rule, '$', '$', LEFT, rule+9);  // End point
+    rule++;
 
-        // Skip to bit 3 of MMB
-        rule = nextRIGHT(rule);
-        rule = nextRIGHT(rule);
-        rule = nextRIGHT(rule);
-        rule = nextRIGHT(rule);
+    // 7 Seek left to the marked bit of PC and write 1
+    rule = next_LEFT(rule);
+    SetRule(rule-1, '_', '1', RIGHT, rule);
 
-        for(j=0; j<i; j++){
+    // 8 Skip cx
+    rule = nextRIGHT(rule);
 
-            // Skip next left MMB bit
-            rule = nextRIGHT(rule);       
-        }
+    // 9 Mark the next bit right of PC
+    SetRule(rule, '0', '_', RIGHT, rule+1);
+    SetRule(rule, '1', '_', RIGHT, rule+1);
+    SetRule(rule, '$', '_', RIGHT, rule+1);
+    rule++;
 
-        // Read current bit in MMB and branch
-        SetRule(rule, '0', '0', RIGHT, rule+4+i*2);
-        SetRule(rule, '1', '1', RIGHT, rule+1);
-        rule++;
+    // 10 Seek right to the marked bit of MMB, write 1 and repeat with the next bit
+    rule = next_RIGHT(rule);
+    SetRule(rule-1, '_', '1', RIGHT, rule-5);
 
-        // Readed bit was a 1
-        // Seek to P3 of PC
-        rule = next_LEFT(rule, LEFT); 
-        rule = next_LEFT(rule);
+    // 11 Seek left to the marked bit of PC and write 0
+    rule = next_LEFT(rule);
+    SetRule(rule-1, '_', '0', RIGHT, rule);
 
-        for(j=0; j<i; j++){
+    // 12 Skip cx
+    rule = nextRIGHT(rule);
 
-            // Skip jx bit in PC
-            rule = nextRIGHT(rule);  
-            rule = nextRIGHT(rule);
-        }
+    // 13 Mark the next bit right of PC
+    SetRule(rule, '0', '_', RIGHT, rule+1);
+    SetRule(rule, '1', '_', RIGHT, rule+1);
+    SetRule(rule, '$', '_', RIGHT, rule+1);
+    rule++;
 
-        // Write a 1 into current bit of PC
-        SetRule(rule, '0', '1', RIGHT, rule+4+i*2);
-        SetRule(rule, '1', '1', RIGHT, rule+4+i*2);  
-        rule++;
+    // 14 Seek right to the marked bit of MMB, write 0 and repeat with the next bit
+    rule = next_RIGHT(rule);
+    SetRule(rule-1, '_', '0', RIGHT, rule-9);   // The rule are just incrementet !!!!
 
-        // Readed bit was a 0
-        // Seek to P3 of PC
-        rule = next_LEFT(rule, LEFT); 
-        rule = next_LEFT(rule);
+    // ----- Done copy -----
 
-        for(j=0; j<i; j++){
+    // 15 Remark the last marked byte of PC
+    rule = next_LEFT(rule);
+    SetRule(rule-1, '_', '$', RIGHT, rule);
 
-            // Skip jx bit in PC
-            rule = nextRIGHT(rule);  
-            rule = nextRIGHT(rule);
-        }
-
-        // Write a 0 into current bit of PC
-        SetRule(rule, '0', '0', RIGHT, rule+1);
-        SetRule(rule, '1', '0', RIGHT, rule+1);  
-        rule++;
-
-        // Jump back to bit7 of MMB
-        rule = next_RIGHT(rule);
-    }
-
-    // Change the last rule
-    SetRule(rule-1, '_', '_', LEFT, rule);
+    // 16 Seek to M3
+    rule = next$RIGHT(rule);
 
     return rule;
 }

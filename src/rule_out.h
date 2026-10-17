@@ -7,12 +7,11 @@
     Instruction rule for OUT
     Entry conditions: IR and current MMB is marked
     Entry point     : NP pointer position I0 of Instruction Register IR
+    Exit conditions : No markers
     Exit point      : NP pointer position M0 of Memory Address Register MAR 
     Rules           : 27 
 */
 void GenerateRuleOUT(uint16_t rule) {
-
-    uint8_t i;
 
     // Skip one position to LEFT (Unique rule OUT)
     SetRule(rule, '_', '_', LEFT, rule+1);
@@ -21,28 +20,23 @@ void GenerateRuleOUT(uint16_t rule) {
     SetRule(rule, '$', '$', LEFT, rule+1);
     rule++;
 
-    // Seek one position left of marked IR to O0
-    rule = next_LEFT(rule, LEFT);
-
-    // Skip PC
+    // Skip PC (IR is yet marked)
     rule = next$LEFT(rule);
 
     // Seek to A7
     rule = next$LEFT(rule, RIGHT);
 
     // Out A
-    for(i=0; i<8; i++) {
-
-        // Output of bit7 to bit1 (A register)
-        SetRule(rule, '0', '0', RIGHT, rule+1, CLKOUT);
-        SetRule(rule, '1', '1', RIGHT, rule+1, CLKOUT);
-        rule++;
-
-        // Skip next right the current bit of B register and set CLKOUT to LOW
-        rule = nextRIGHT(rule);
-    }
-    // Skip next right to $ and trigger the hardware shift register output latch
-    rule = nextRIGHT(rule);
+    // Output of bit7 to bit1 (A register)
+    SetRule(rule, '0', '0', RIGHT, rule+1, CLKOUT);
+    SetRule(rule, '1', '1', RIGHT, rule+1, CLKOUT);
+    // Latch shift register 74xx595 to output register 
+    SetRule(rule, '$', '$', RIGHT, rule+2);
+    rule++;
+    // Skip Bx, set CLKOUT LOW and repeat next bit if A
+    SetRule(rule, '0', '0', RIGHT, rule-1);
+    SetRule(rule, '1', '1', RIGHT, rule-1);
+    rule++;
 
     // Skip right the PC
     rule = next_RIGHT(rule);

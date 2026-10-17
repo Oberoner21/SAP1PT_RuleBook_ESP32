@@ -8,7 +8,7 @@
     Entry conditions: IR and current MMB is marked
     Entry point     : NP pointer position I0 of Instruction Register IR
     Exit point      : NP pointer position M0 of Memory Address Register MAR 
-    Rules           : 92 
+    Rules           : 32 
 */
 void GenerateRuleJC(uint16_t rule) {
 
@@ -23,8 +23,6 @@ void GenerateRuleJC(uint16_t rule) {
     //  - Remark IR
     //  - Seek to MAR0
     //  - Go to RULE_FETCH
-
-    uint8_t i, j;
 
     SetRule(rule, '_', '_', LEFT, rule+1);
     SetRule(rule, '0', '0', LEFT, rule+1);
@@ -45,14 +43,18 @@ void GenerateRuleJC(uint16_t rule) {
 
     // Skip marked IR
     rule = next_RIGHT(rule);
-    SetRule(rule-1, '_', '_', RIGHT, rule+84);     // <-- Jump to END !!!!
+    SetRule(rule-1, '_', '_', RIGHT, rule+23);     // <-- Jump to END !!!!
 
     // ++++++++ Carry is set +++++++++++++
 
-    // Seek to PC and mark it
+    // Seek to PC and mark P3
     rule = next$RIGHT(rule);
     rule = next$RIGHT(rule);
-    SetRule(rule-1, '$', '_', RIGHT, rule);
+    SetRule(rule, '0', '_', RIGHT, rule+1);
+    SetRule(rule, '1', '_', RIGHT, rule+1);
+    SetRule(rule, '_', '_', RIGHT, rule+1);
+    SetRule(rule, '$', '_', RIGHT, rule+1);
+    rule++;
 
     // Seek to IR and remark it
     rule = next_RIGHT(rule);
@@ -64,13 +66,9 @@ void GenerateRuleJC(uint16_t rule) {
     // Copy low nibbel of MMB into interleaved PC
     rule = CopyMMBArgToPC(rule);
 
-    // Remark PC
-    rule = next_LEFT(rule);
-    SetRule(rule-1, '_', '$', RIGHT, rule);
-
-    // Seek to IR and mark it
+    // Seek to M0 and go to RULE_FETCH
     rule = next$RIGHT(rule);
-    SetRule(rule-1, '$', '_', RIGHT, rule);
+    SetRule(rule-1, '$', '$', LEFT, RULE_FETCH);
 
     // ++++++++++++ END ++++++++++++++++++
 

@@ -3,14 +3,13 @@
     Modul:  rule_sta.h
 
     Copyright(C) 2026 by Oberoner
-*/
 
-/*
     Instruction rule for STA
     Entry conditions: IR and current MMB is marked
     Entry point     : NP pointer position I0 of Instruction Register IR
+    Exit conditions : Nothing is marked
     Exit point      : NP pointer position M0 of Memory Address Register MAR 
-    Rules           : 298 
+    Rules           : 92 
 */
 void GenerateRuleSTA(uint16_t rule) {
 
@@ -27,8 +26,6 @@ void GenerateRuleSTA(uint16_t rule) {
     // Remark register A/B
     // Seek to bit M0 of Memory address register MR
     // Go back to RULE_FETCH
-
-    uint8_t i, j;
 
     SetRule(rule, '_', '_', LEFT, rule+1);
     SetRule(rule, '0', '0', LEFT, rule+1);
@@ -47,12 +44,14 @@ void GenerateRuleSTA(uint16_t rule) {
     rule = next_RIGHT(rule);
     SetRule(rule-1, '_', '$', RIGHT, rule);
 
-    // Skip Program counter PC
-    //rule = next$RIGHT(rule);
-
-    // Seek to MAR and mark it
+    // Seek to MAR to bit M3
     rule = next$RIGHT(rule);
-    SetRule(rule-1, '$', '_', RIGHT, rule); 
+
+    // Mark M3 and skip right
+    SetRule(rule, '0', '_', RIGHT, rule+1);
+    SetRule(rule, '1', '_', RIGHT, rule+1);
+    SetRule(rule, '$', '_', RIGHT, rule+1);
+    rule++;
 
     // Seek to bit7 of the marked memory byte
     rule = next_RIGHT(rule);
@@ -60,26 +59,24 @@ void GenerateRuleSTA(uint16_t rule) {
     // Copy low nibble of MMB into MAR
     rule = CopyMMBArgToMAR(rule);
 
-    // Seek back to bit3 of MAR
+    // // Seek back to bit3 of MAR
     rule = next_LEFT(rule);
 
-    // ------ Mark the memory byte, addressed by register MAR ------
+    // Mark the memory byte, addressed by register MAR
     rule = MarkMemoryByte(rule);
-    // Change the direction of last rule to LEFT
-    SetRule(rule-1, '_', '_', LEFT, rule);
+    // Change the last rule to remark MMB
+    SetRule(rule-1, '_', '$', RIGHT, rule);
+
+    // Mark bit7 of MMB
+    SetRule(rule, '0', '_', LEFT, rule+1);
+    SetRule(rule, '1', '_', LEFT, rule+1);
+    rule++;
 
     // Seek to A7 of marked register A/B
     rule = next_LEFT(rule); 
 
     // Copy A into MMB
     rule = CopyAtoMMB(rule);
-
-    // Seek back to MMB an remark it
-    rule = next_RIGHT(rule);
-    SetRule(rule-1, '_', '$', LEFT, rule);
-    // Seek to marked register A/B
-    rule = next_LEFT(rule);
-    SetRule(rule-1, '_', '$', RIGHT, rule);
 
     // Skip right register A/B
     rule = next$RIGHT(rule);

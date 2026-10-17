@@ -41,8 +41,6 @@ void GenerateRuleRESET(uint16_t rule, uint8_t USE_FSM) {
 
     // ------------ Skip to position MAR0 -------------
 
-    // ------------ Skip to position MAR0 -------------
-
     rule = next$RIGHT(rule);                        // Skip first $
     rule = next$RIGHT(rule);                        // Skip second $
     rule = next$RIGHT(rule);                        // Skip the flags

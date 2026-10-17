@@ -3,82 +3,74 @@
     Modul:  cpyMMBArgToMAR.h
 
     Copyright(C) 2026 by Oberoner
-*/
 
-/*
     Copies the argument (low nibble) from a marked memory byte (MMB) into 
     the Memory Address Register MAR.
-    Entry conditions: PC and MMB is marked
+    Entry conditions: M3 and MMB is marked
     Entry point     : NP pointer position bit7 of the MMB
-    Exit point      : NP pointer position one position left from marker of the MMB. 
-                      The MMB is now remarked. 
+    Exit conditions : M3 is marked
+    Exit point      : NP pointer position M3 of marked MAR 
     Rules           : 66 
 */
 uint16_t CopyMMBArgToMAR(uint16_t rule) {
 
-    uint8_t i, j;
+    // 0 Skip left to the MMB marker
+    rule = nextLEFT(rule);
+    // 1 Remark the MMB
+    SetRule(rule, '_', '$', RIGHT, rule+1);
+    rule++;
+    // 2 Skip right to bit6 of MMB
+    rule = nextRIGHT(rule);
+    // 3 Skip right to bit5 of MMB
+    rule = nextRIGHT(rule);
+    // 4 Skip right to bit4 of MMB
+    rule = nextRIGHT(rule);
+    // 5 Skip right to bit3 of MMB
+    rule = nextRIGHT(rule);
 
-    // ---------- Copy low nibble of MMB into MAR  -----------
+    // 6 Read current bit of MMB mark it and branch
+    SetRule(rule, '0', '_', LEFT, rule+4);
+    SetRule(rule, '1', '_', LEFT, rule+1);
+    SetRule(rule, '$', '$', LEFT, rule+7);  // End point
+    rule++;
 
-    for(i=0; i<4; i++) {
+    // 7 Seek left to the marked bit of MAR and write 1
+    rule = next_LEFT(rule);
+    SetRule(rule-1, '_', '1', RIGHT, rule);
 
-        // Skip 4 byte right to bit3 of the marked memory register
-        rule = nextRIGHT(rule);
-        rule = nextRIGHT(rule);
-        rule = nextRIGHT(rule);
-        rule = nextRIGHT(rule);
+    // 8 Mark the next bit right of MAR
+    SetRule(rule, '0', '_', RIGHT, rule+1);
+    SetRule(rule, '1', '_', RIGHT, rule+1);
+    SetRule(rule, '$', '_', RIGHT, rule+1);
+    rule++;
 
-        for(j=0; j<i; j++){
- 
-            // Skip jx right in marked memory byte 
-            rule = nextRIGHT(rule);     
-        }
+    // 9 Seek right to the marked bit of MMB, write 1 and repeat with the next bit
+    rule = next_RIGHT(rule);
+    SetRule(rule-1, '_', '1', RIGHT, rule-4);
 
-        // Read current bit of marked memory Byte and branche
-        SetRule(rule, '0', '0', RIGHT, rule+1);
-        SetRule(rule, '1', '1', RIGHT, rule+4+i);
-        rule++;
+    // 10 Seek left to the marked bit of MAR and write 0
+    rule = next_LEFT(rule);
+    SetRule(rule-1, '_', '0', RIGHT, rule);
 
-        // Skip left to the memory byte marker
-        rule = next_LEFT(rule, LEFT); 
+    // 11 Mark the next bit right of MAR
+    SetRule(rule, '0', '_', RIGHT, rule+1);
+    SetRule(rule, '1', '_', RIGHT, rule+1);
+    SetRule(rule, '$', '_', RIGHT, rule+1);
+    rule++;
 
-        // Skip to bit3 of the marked register MAR 
-        rule = next_LEFT(rule);
+    // 12 Seek right to the marked bit of MMB, write 0 and repeat with the next bit
+    rule = next_RIGHT(rule);
+    SetRule(rule-1, '_', '0', RIGHT, rule-7);   // The rule are just incrementet !!!!
 
-        for(j=0; j<i; j++){
- 
-            // Skip jx bit right in MAR
-            rule = nextRIGHT(rule);     
-        }
+    // ----- Done copy -----
 
-        // Write a 0 into current bit of MAR
-        SetRule(rule, '0', '0', RIGHT, rule+4+i);
-        SetRule(rule, '1', '0', RIGHT, rule+4+i);
-        rule++;
-
-    
-        // Skip to memory byte marker 
-        rule = next_LEFT(rule, LEFT);
-        // Skip the market destination register MAR 
-        rule = next_LEFT(rule);
-
-        for(j=0; j<i; j++){
- 
-            // Skip jx bit right in MAR
-            rule = nextRIGHT(rule);     
-        }
-
-        // Write a 1 into current bit of MAR
-        SetRule(rule, '0', '1', RIGHT, rule+1);
-        SetRule(rule, '1', '1', RIGHT, rule+1);
-        rule++;
-
-        // Skip back to Bit7 of the marked byte 
-        rule = next_RIGHT(rule);
-    }
-    // Change last rule
-    // Remark the marked memory byte
+    // 13 Remark the last marked byte of MAR
+    rule = next_LEFT(rule);
     SetRule(rule-1, '_', '$', LEFT, rule);
+
+    // 14 Mark MAR and skip right to M3
+    rule = next$LEFT(rule);
+    SetRule(rule-1, '$', '_', RIGHT, rule);
 
     return rule;
 }
